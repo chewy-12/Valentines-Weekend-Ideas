@@ -6,107 +6,154 @@
 <title>Happy Valentine's Day Lezly ❤️</title>
 
 <style>
-body {
-  margin: 0;
-  height: 100vh;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  font-family: system-ui, sans-serif;
-  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
-  text-align: center;
-}
+  body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+    display:grid;
+    place-items:center;
+    font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background:linear-gradient(135deg,#ff9a9e,#fad0c4);
+    text-align:center;
+  }
 
-.card {
-  background: white;
-  padding: 50px 40px;
-  border-radius: 25px;
-  box-shadow: 0 25px 60px rgba(0,0,0,.2);
-  max-width: 420px;
-  z-index: 2;
-  transition: .4s ease;
-}
+  .card{
+    background:white;
+    padding:52px 42px;
+    border-radius:26px;
+    box-shadow:0 25px 60px rgba(0,0,0,.2);
+    max-width:440px;
+    z-index:2;
+    transform:translateY(10px);
+    opacity:0;
+    animation:fadeIn .9s ease forwards;
+  }
 
-h1 {
-  margin: 0;
-  font-size: 2.3rem;
-  color: #d62828;
-}
+  @keyframes fadeIn{
+    to { opacity:1; transform:translateY(0); }
+  }
 
-button {
-  margin-top: 25px;
-  padding: 12px 28px;
-  font-size: 1rem;
-  border-radius: 30px;
-  border: none;
-  background: #ff4d6d;
-  color: white;
-  cursor: pointer;
-  transition: .3s;
-}
+  h1{
+    margin:0;
+    font-size:2.35rem;
+    color:#d62828;
+    letter-spacing:-0.02em;
+  }
 
-button:hover {
-  background: #e03157;
-  transform: scale(1.05);
-}
+  .sub{
+    margin-top:14px;
+    font-size:1.05rem;
+    color:#555;
+    line-height:1.55;
+  }
 
-.message {
-  margin-top: 20px;
-  font-size: 1.5rem;
-  color: #444;
-  display: none;
-}
+  .message{
+    margin-top:18px;
+    font-size:1.65rem;
+    color:#333;
+    font-weight:650;
+    letter-spacing:-0.01em;
+  }
 
-.floating {
-  position: absolute;
-  font-size: 18px;
-  opacity: .5;
-  animation: float 10s linear infinite;
-}
+  button{
+    margin-top:24px;
+    padding:12px 30px;
+    font-size:1rem;
+    border-radius:999px;
+    border:none;
+    background:#ff4d6d;
+    color:white;
+    cursor:pointer;
+    transition:.25s ease;
+  }
+  button:hover{ transform:scale(1.05); background:#e03157; }
+  button:active{ transform:scale(0.98); }
 
-@keyframes float {
-  0% { transform: translateY(100vh); }
-  100% { transform: translateY(-10vh); }
-}
+  /* Background floaters (equations + icons) */
+  .floating{
+    position:absolute;
+    bottom:-30px;
+    opacity:.45;
+    animation:floatUp linear forwards;
+    user-select:none;
+    pointer-events:none;
+    filter: blur(0.1px);
+  }
+
+  @keyframes floatUp{
+    from{ transform:translateY(0); }
+    to{ transform:translateY(-120vh); }
+  }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h1>Happy Valentine’s Day Lezly ❤️</h1>
-  <button onclick="reveal()">Open Your Card</button>
-  <div class="message" id="msg">
-    You are the best teacher ever! 🍎✨
-  </div>
-</div>
+<div class="card" id="card"></div>
 
 <script>
-function reveal() {
-  document.getElementById("msg").style.display = "block";
-}
+  // --- 1) "Refresh" style reveal using a URL flag ---
+  const params = new URLSearchParams(window.location.search);
+  const isOpen = params.get("open") === "1";
 
-const elements = [
-  "2 + 2 = 4",
-  "1 + You = ❤️",
-  "5 × Kindness = Smiles",
-  "ABC",
-  "⭐",
-  "📚"
-];
+  const card = document.getElementById("card");
 
-function createFloating() {
-  const el = document.createElement("div");
-  el.classList.add("floating");
-  el.innerHTML = elements[Math.floor(Math.random() * elements.length)];
-  el.style.left = Math.random() * 100 + "vw";
-  el.style.animationDuration = (Math.random() * 5 + 7) + "s";
-  document.body.appendChild(el);
+  function renderClosed() {
+    card.innerHTML = `
+      <h1>Happy Valentine’s Day Lezly ❤️</h1>
+      <div class="sub">I made you a little card.</div>
+      <button id="openBtn">Open Your Card</button>
+    `;
+    document.getElementById("openBtn").addEventListener("click", () => {
+      // "Refresh" into open state (keeps it simple + reliable)
+      const url = new URL(window.location.href);
+      url.searchParams.set("open", "1");
+      window.location.href = url.toString();
+    });
+  }
 
-  setTimeout(() => el.remove(), 10000);
-}
+  function renderOpen() {
+    card.innerHTML = `
+      <div class="message">You are the best teacher ever! 🍎✨</div>
+      <div class="sub">Happy Valentine’s Day, Lezly ❤️</div>
+    `;
+  }
 
-setInterval(createFloating, 800);
+  if (isOpen) renderOpen();
+  else renderClosed();
+
+  // --- 2) Background animations (always running) ---
+  const floaters = [
+    "💖","💗","💘","⭐","📚","✏️","🍎",
+    "2 + 2 = 4",
+    "10 − 3 = 7",
+    "5 × 2 = 10",
+    "ABC",
+    "1 + You = ❤️"
+  ];
+
+  function createFloater() {
+    const el = document.createElement("div");
+    el.className = "floating";
+    el.textContent = floaters[Math.floor(Math.random() * floaters.length)];
+
+    // Position + sizing
+    el.style.left = Math.random() * 100 + "vw";
+    const size = Math.random() * 18 + 16; // 16–34px
+    el.style.fontSize = size + "px";
+
+    // Duration
+    const duration = Math.random() * 5 + 7; // 7–12s
+    el.style.animationDuration = duration + "s";
+
+    document.body.appendChild(el);
+
+    setTimeout(() => el.remove(), duration * 1000 + 200);
+  }
+
+  // Slightly denser when opened (feels more magical)
+  const intervalMs = isOpen ? 450 : 700;
+  setInterval(createFloater, intervalMs);
 </script>
 
 </body>
